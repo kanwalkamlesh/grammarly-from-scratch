@@ -1,21 +1,34 @@
-from spellchecker import SpellChecker
+import re
+from collections import Counter
 
-# Initialize the spell checker
-spell = SpellChecker()
+def words(text):
+    return re.findall(r'\w+', text.lower())
 
-def check_spelling(text):
-    # Tokenize the input text into words
-    words = text.split()
+def load_dictionary():
+    with open("big.txt", encoding="utf-8") as f:
+        return Counter(words(f.read()))
 
-    # Find words that might be misspelled
-    misspelled = spell.unknown(words)
+WORD_COUNTS = load_dictionary()
+WORD_SET = set(WORD_COUNTS)
 
-    # Store the suggestions for each misspelled word
-    suggestions = {}
+def edits1(word):
+    letters = 'abcdefghijklmnopqrstuvwxyz'
+    splits = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+    deletes = [L + R[1:] for L, R in splits if R]
+    transposes = [L + R[1] + R[0] + R[2:] for L, R in splits if len(R) > 1]
+    replaces = [L + c + R[1:] for L, R in splits if R for c in letters]
+    inserts = [L + c + R for L, R in splits for c in letters]
+    return set(deletes + transposes + replaces + inserts)
 
-    for word in misspelled:
-        # Get the most likely correction for the misspelled word
-        suggestions[word] = spell.correction(word)
+def known(words):
+    return set(w for w in words if w in WORD_SET)
 
-    return suggestions
-  # Import the spell check module
+def correct(word):
+    if word in WORD_SET:
+        return word
+    candidates = known(edits1(word)) or [word]
+    return max(candidates, key=WORD_COUNTS.get)
+
+def correct_text(text):
+    tokens = text.split()
+    return ' '.join(correct(word.lower()) for word in tokens)
