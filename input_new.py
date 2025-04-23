@@ -1,3 +1,4 @@
+import tkinter as tk
 def launch_text_input_gui():
     def on_submit():
         user_text = text_box.get("1.0", tk.END).strip()
