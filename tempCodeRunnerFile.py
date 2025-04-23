@@ -1,5 +1,3 @@
-del
-
 
 
 # Run the GUI
