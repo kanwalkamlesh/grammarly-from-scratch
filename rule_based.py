@@ -1,4 +1,7 @@
 # Rule-Based Grammar Checker
+import re
+import spacy
+nlp = spacy.load("en_core_web_sm")
 def grammar_check(text):
     issues = []
     
